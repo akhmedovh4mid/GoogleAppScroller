@@ -53,7 +53,7 @@ class GoogleParser:
         center_x = round(self.device.info["displayWidth"] / 2)
         duration=0.2
         shift_bottom = 25
-        shift_top = 25
+        shift_top = 100
 
         self.device.swipe_points(
             points=[
@@ -85,7 +85,7 @@ class GoogleParser:
                 time.sleep(3)
                 self.refresh_content()
 
-                time.sleep(5)
+                time.sleep(7)
 
 
     def run(self):
