@@ -7,8 +7,9 @@ from typing import Optional
 class GoogleParser:
     PACKAGE_NAME = "com.google.android.googlequicksearchbox"
     DISCOVER_BUTTON_ID = "com.google.android.googlequicksearchbox:id/googleapp_navigation_bar_discover"
-    VOICE_SEARCH_DESC = "Voice search"
-    VOICE_SEARCH_DESC_RU = "Голосовой поиск"
+    # VOICE_SEARCH_DESC = "Voice search"
+    # VOICE_SEARCH_DESC_RU = "Голосовой поиск"
+    BATTERY = "com.android.systemui:id/battery"
     MORE_STORIES_DESC = "More stories"
     MORE_STORIES_DESC_RU = "Другие статьи"
 
@@ -46,14 +47,28 @@ class GoogleParser:
             duration=duration
         )
 
+    def refresh_content(self) -> None:
+        """Обновляет рекомендации
+        """
+        center_x = round(self.device.info["displayWidth"] / 2)
+        duration=0.2
+        shift_bottom = 25
+        shift_top = 25
+
+        self.device.swipe_points(
+            points=[
+                (center_x, self.top_y + shift_top),
+                (center_x, self.bottom_y - shift_bottom),
+            ],
+            duration=duration
+        )
+
     def parse_news(self):
         """Парсинг новостной ленты Google."""
         home_button = self.device(resourceId=self.DISCOVER_BUTTON_ID)
         home_button.click()
 
-        top_obj = self.device(description=self.VOICE_SEARCH_DESC)
-        if not top_obj.exists():
-            top_obj = self.device(description=self.VOICE_SEARCH_DESC_RU)
+        top_obj = self.device(resourceId=self.BATTERY)
         self.top_y = top_obj.bounds()[3]
 
         self.bottom_y = home_button.bounds()[1]
@@ -66,7 +81,11 @@ class GoogleParser:
             if site_end.exists() or site_end_ru.exists():
                 time.sleep(3)
                 home_button.click()
+
                 time.sleep(3)
+                self.refresh_content()
+
+                time.sleep(5)
 
 
     def run(self):

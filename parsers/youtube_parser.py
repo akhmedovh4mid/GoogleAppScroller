@@ -68,11 +68,15 @@ class YoutubeParser:
             - 'sponsored' - спонсорский контент
             None - если тип не определен
         """
-        time.sleep(2)
+        time.sleep(3)
+
         count: int = 0
         comment_count: int = 0
+        concept_count: int = 0
+        sponsored_count: int = 0
+
         while count < 10:
-            time.sleep(0.25)
+            time.sleep(1)
             screenshot = self.device.screenshot()
             screenshot_data = self.get_screen_data(image=screenshot, lang="eng")
             _union_text_for_check: str = " ".join(screenshot_data["text"])
@@ -80,14 +84,18 @@ class YoutubeParser:
             if ("comments" in _union_text_for_check.lower()):
                 comment_count += 1
             elif ("key concepts" in _union_text_for_check.lower()):
-                return "concepts"
+                concept_count += 1
             elif "sponsored" in _union_text_for_check.lower():
-                return "sponsored"
+                sponsored_count += 1
 
-            if comment_count == 3:
+            if comment_count >= 3:
                 return "comments"
-
-            count += 1
+            elif concept_count >= 3:
+                return "concept"
+            elif sponsored_count >= 5:
+                return "sponsored"
+            else:
+                count += 1
 
         return None
 
@@ -117,6 +125,22 @@ class YoutubeParser:
             duration=duration
         )
 
+    def refresh_content(self) -> None:
+        """Обновляет рекомендации
+        """
+        center_x = round(self.device.info["displayWidth"] / 2)
+        duration=0.2
+        shift_bottom = 25
+        shift_top = self.device.info["displayHeight"] * 0.19
+
+        self.device.swipe_points(
+            points=[
+                (center_x, self.top_y + shift_top),
+                (center_x, self.bottom_y - shift_bottom),
+            ],
+            duration=duration
+        )
+
     def parse_recommendations(self) -> None:
         """Парсит рекомендации на главной странице YouTube.
 
@@ -135,9 +159,18 @@ class YoutubeParser:
         self.bottom_y = bottom_obj.bounds()[1]
 
         count = 0
-        while count < 45:
+        while True:
             self.swipe(duration=self.duration)
             count += 1
+
+            if count == 45:
+                time.sleep(3)
+
+                home_button.click()
+                time.sleep(3)
+
+                self.refresh_content()
+                time.sleep(5)
 
     def parse_links(self) -> None:
         """Парсит видео из файла с ссылками.

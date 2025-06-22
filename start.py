@@ -6,6 +6,7 @@ import subprocess
 
 from typing import List
 from pathlib import Path
+from argparse import Namespace
 
 from parsers.common import configure_logging
 
@@ -13,15 +14,15 @@ from parsers.common import configure_logging
 logger = logging.getLogger(__name__)
 configure_logging()
 
-VENV_NAME = ".venv"
+VENV_NAME: str = ".venv"
 
-REQUIREMENTS = [
+REQUIREMENTS: List[str] = [
     "pillow==11.2.1",
     "pytesseract==0.3.13",
     "uiautomator2==3.3.2",
 ]
 
-def create_venv():
+def create_venv() -> bool:
     """Создает виртуальное окружение"""
     try:
         # Проверяем, не существует ли уже venv
@@ -51,7 +52,7 @@ def create_venv():
         return False
 
 
-def install_packages():
+def install_packages() -> bool:
     """Устанавливает пакеты в виртуальное окружение"""
     try:
         # Определяем пути
@@ -123,9 +124,8 @@ def verify_installation() -> bool:
         return False
 
 
-def build():
+def build() -> None:
     """Основная функция"""
-    # configure_logging(level=logging.DEBUG)
 
     logger.info("=== Начало настройки окружения ===")
 
@@ -145,7 +145,7 @@ def build():
     logger.info(f"  Windows:  {VENV_NAME}\\Scripts\\activate")
     logger.info(f"  Linux/Mac:  source {VENV_NAME}/bin/activate")
 
-def parse_args():
+def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(description="Настройка параметров парсинга")
 
     parser.add_argument(
@@ -178,7 +178,7 @@ def activate_and_run():
 
     # Проверяем существование main.py
     if not main_script.exists():
-        print("Ошибка: Файл main.py не найден!")
+        logger.error("Ошибка: Файл main.py не найден!")
         sys.exit(1)
 
     # Команда активации в зависимости от ОС
@@ -191,7 +191,7 @@ def activate_and_run():
 
     # Запускаем
     try:
-        print(f"Активируем окружение и запускаем {main_script}...")
+        logger.info(f"Активируем окружение и запускаем {main_script}...")
         if os.name == 'nt':
             subprocess.run(command, shell=True, check=True)
         else:
@@ -201,7 +201,7 @@ def activate_and_run():
         return
 
     except subprocess.CalledProcessError as e:
-        print(f"Ошибка при запуске: {e}")
+        logger.error(f"Ошибка при запуске: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

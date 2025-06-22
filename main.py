@@ -138,4 +138,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n[INFO] Программа прервана пользователем.")
+        logger.info("\n[INFO] Программа прервана пользователем.")
