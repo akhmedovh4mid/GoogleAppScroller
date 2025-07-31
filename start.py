@@ -149,6 +149,13 @@ def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(description="Настройка параметров парсинга")
 
     parser.add_argument(
+        "-s", "--serials",
+        nargs="+",
+        help="Список Serials",
+        required=True
+    )
+
+    parser.add_argument(
         "-d", "--duration",
         type=float,
         default=0.5,
@@ -184,10 +191,10 @@ def activate_and_run():
     # Команда активации в зависимости от ОС
     if os.name == 'nt':  # Windows
         activate_script = venv_path / "Scripts" / "activate.bat"
-        command = f'call "{activate_script}" && python {main_script} -d {args.duration} -p {args.parsing}'
+        command = f'call "{activate_script}" && python {main_script} -s {" ".join(args.serials)} -d {args.duration} -p {args.parsing}'
     else:  # Linux/Mac
         activate_script = venv_path / "bin" / "activate"
-        command = f'source "{activate_script}" && python3 {main_script} -d {args.duration} -p {args.parsing}'
+        command = f'source "{activate_script}" && python3 {main_script} -s {args.serials} -d {args.duration} -p {args.parsing}'
 
     # Запускаем
     try:

@@ -57,6 +57,13 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Настройка параметров парсинга")
 
     parser.add_argument(
+        "-s", "--serials",
+        nargs="+",
+        help="Список Serials",
+        required=True
+    )
+
+    parser.add_argument(
         "-d", "--duration",
         type=float,
         default=0.5,
@@ -80,7 +87,14 @@ def main():
 
     args = parse_args()
     devices = get_android_devices_list()
-    device_serials = [device.serial for device in devices]
+    attach_device_serials = [device.serial for device in devices]
+    device_serials = []
+
+    for serial in args.serials:
+        if serial not in attach_device_serials:
+            logger.error(f"Устройство {serial} не существует!")
+        else:
+            device_serials.append(serial)
 
     if not device_serials:
         logger.error("Устройства не найдены. Завершение работы.")
